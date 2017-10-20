@@ -23,8 +23,8 @@ import static org.junit.Assert.assertTrue;
  */
 public class FirstTest extends BaseTest {
 
-
-//    public TestWatcher tw = new TestWatchman();
+    @Rule
+    public TestWatcher tw = new TestWatchman();
     private Utils utils = new Utils();
 
     @Test

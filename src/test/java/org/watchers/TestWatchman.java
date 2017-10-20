@@ -13,11 +13,11 @@ public class TestWatchman extends TestWatcher {
 
     @Override
     protected void failed(Throwable e, Description description) {
-        LOG.info("Test "+ description.getDisplayName()+ " - failed.");
+        LOG.info("Test "+ description.getDisplayName() + " - failed.");
     }
 
     @Override
     protected void succeeded(Description description) {
-        LOG.info("Test "+ description.getAnnotations() + " -  successfully completed.");
+        LOG.info("Test "+ description.getDisplayName() + " -  successfully completed.");
     }
 }
