@@ -1,3 +1,4 @@
+package org;
 
 public enum Site {
     ALL("/all"),
