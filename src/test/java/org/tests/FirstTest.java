@@ -1,20 +1,20 @@
 package org.tests;
 
-import com.sun.org.glassfish.gmbal.Description;
 import io.restassured.response.Response;
 import org.BaseTest;
 import org.Site;
 import org.Utils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
-import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestWatcher;
 import org.watchers.TestWatchman;
 
-import java.net.MalformedURLException;
+import java.io.IOException;
 
+import java.util.*;
 import static io.restassured.RestAssured.get;
 import static org.junit.Assert.assertTrue;
 
@@ -27,16 +27,51 @@ public class FirstTest extends BaseTest {
     public TestWatcher tw = new TestWatchman();
     private Utils utils = new Utils();
 
+    private Response resp;
+
     @Test
-    public void isCapital() throws MalformedURLException, JSONException {
-        Response resp = get(utils.getEndpoint()
+    public void isCapital() throws IOException {
+        resp = get(utils.getEndpoint()
 //                + Site.ALL.get()
-                + String.format(Site.FULL_NAME.get(), "Belarus"));
+                + format(Site.FULL_NAME, "Belarus"));
+        resp.then().statusCode(200);
 
         JSONArray jsonResponse = new JSONArray(resp.asString());
-
         assertTrue("Wrong response",
                 StringUtils.equals(jsonResponse.getJSONObject(0).getString("capital"), "Minsk"));
 
     }
+
+    @Test
+    public void isISO(){
+        resp = get(utils.getEndpoint()
+                + format(Site.CODE, "BLR"));
+
+        resp.then().statusCode(200);
+        JSONObject jsonResponse = new JSONObject(resp.asString());
+        assertTrue("Wrong response",
+                StringUtils.equals(jsonResponse.getString("capital"), "Minsk"));
+    }
+
+    String format(Site structure, String str){
+        return String.format(structure.get(), str);
+    }
+
+    @Test
+    public void listOfCodes(){
+        List<String> capitals = new LinkedList<>(Arrays.asList("Minsk", "Moscow", "Kiev"));
+        Iterator it = capitals.iterator();
+
+        resp = get(utils.getEndpoint()
+                + format(Site.LIST_OF_CODES, "blr;ru;ua"));
+
+        resp.then().statusCode(200);
+        JSONArray jsonResponse = new JSONArray(resp.asString());
+        jsonResponse.forEach((i -> {
+            String currCountry = ((JSONObject) i).getString("capital");
+            assertTrue("Not this country expected while asserting - \"" + currCountry + "\" country",
+                    StringUtils.equals(currCountry, it.next().toString()));
+        }));
+    }
+
 }

@@ -3,7 +3,9 @@ package org;
 public enum Site {
     ALL("/all"),
     NAME("/name/%s"),
-    FULL_NAME("/name/%s?fullText=true");
+    FULL_NAME("/name/%s?fullText=true"),
+    CODE("/alpha/%s"),
+    LIST_OF_CODES("/alpha?codes=%s");
 
     String s;
 
