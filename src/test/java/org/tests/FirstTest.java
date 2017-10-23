@@ -53,14 +53,9 @@ public class FirstTest extends BaseTest {
                 StringUtils.equals(jsonResponse.getString("capital"), "Minsk"));
     }
 
-    String format(Site structure, String str){
-        return String.format(structure.get(), str);
-    }
-
     @Test
     public void listOfCodes(){
-        List<String> capitals = new LinkedList<>(Arrays.asList("Minsk", "Moscow", "Kiev"));
-        Iterator it = capitals.iterator();
+        final Iterator capitals = new LinkedList<>(Arrays.asList("Minsk", "Moscow", "Kiev")).iterator();
 
         resp = get(utils.getEndpoint()
                 + format(Site.LIST_OF_CODES, "blr;ru;ua"));
@@ -70,8 +65,12 @@ public class FirstTest extends BaseTest {
         jsonResponse.forEach((i -> {
             String currCountry = ((JSONObject) i).getString("capital");
             assertTrue("Not this country expected while asserting - \"" + currCountry + "\" country",
-                    StringUtils.equals(currCountry, it.next().toString()));
+                    StringUtils.equals(currCountry, capitals.next().toString()));
         }));
+    }
+
+    private String format(Site structure, String str){
+        return String.format(structure.get(), str);
     }
 
 }
