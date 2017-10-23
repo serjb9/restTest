@@ -12,8 +12,6 @@ import org.junit.Test;
 import org.junit.rules.TestWatcher;
 import org.watchers.TestWatchman;
 
-import java.io.IOException;
-
 import java.util.*;
 import static io.restassured.RestAssured.get;
 import static org.junit.Assert.assertTrue;
@@ -27,44 +25,42 @@ public class FirstTest extends BaseTest {
     public TestWatcher tw = new TestWatchman();
     private Utils utils = new Utils();
 
-    private Response resp;
-
     @Test
-    public void isCapital() throws IOException {
-        resp = get(utils.getEndpoint()
+    public void testSingleCapital() {
+        Response resp = get(utils.getEndpoint()
 //                + Site.ALL.get()
                 + format(Site.FULL_NAME, "Belarus"));
         resp.then().statusCode(200);
 
         JSONArray jsonResponse = new JSONArray(resp.asString());
-        assertTrue("Wrong response",
+        assertTrue("Expected country is different than in the response.",
                 StringUtils.equals(jsonResponse.getJSONObject(0).getString("capital"), "Minsk"));
 
     }
 
     @Test
-    public void isISO(){
-        resp = get(utils.getEndpoint()
+    public void testISO() {
+        Response resp = get(utils.getEndpoint()
                 + format(Site.CODE, "BLR"));
 
         resp.then().statusCode(200);
         JSONObject jsonResponse = new JSONObject(resp.asString());
-        assertTrue("Wrong response",
+        assertTrue("Expected country is different than in the response.",
                 StringUtils.equals(jsonResponse.getString("capital"), "Minsk"));
     }
 
     @Test
-    public void listOfCodes(){
+    public void testListOfCodes() {
         final Iterator capitals = new LinkedList<>(Arrays.asList("Minsk", "Moscow", "Kiev")).iterator();
 
-        resp = get(utils.getEndpoint()
+        Response resp = get(utils.getEndpoint()
                 + format(Site.LIST_OF_CODES, "blr;ru;ua"));
 
         resp.then().statusCode(200);
         JSONArray jsonResponse = new JSONArray(resp.asString());
         jsonResponse.forEach((i -> {
             String currCountry = ((JSONObject) i).getString("capital");
-            assertTrue("Not this country expected while asserting - \"" + currCountry + "\" country",
+            assertTrue("Expected country is different than in the response. Received \"" + currCountry + "\" country",
                     StringUtils.equals(currCountry, capitals.next().toString()));
         }));
     }
