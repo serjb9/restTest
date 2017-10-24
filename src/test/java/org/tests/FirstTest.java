@@ -44,13 +44,16 @@ public class FirstTest extends BaseTest {
 
     @Test
     public void testISO() {
+        final String countryCode = "Belarus";
+        final String capital = "Minsk";
+
         Response resp = get(utils.getEndpoint()
-                + format(Site.CODE, "BLR"));
+                + format(Site.CODE, countryCode));
 
         resp.then().statusCode(200);
         JSONObject jsonResponse = new JSONObject(resp.asString());
-        assertTrue("Expected country is different than in the response.",
-                StringUtils.equals(jsonResponse.getString("capital"), "Minsk"));
+        assertTrue("Expected country differs than in the response.",
+                StringUtils.equals(jsonResponse.getString("capital"), capital));
     }
 
     @Test
