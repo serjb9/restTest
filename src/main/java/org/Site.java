@@ -5,7 +5,8 @@ public enum Site {
     NAME("/name/%s"),
     FULL_NAME("/name/%s?fullText=true"),
     CODE("/alpha/%s"),
-    LIST_OF_CODES("/alpha?codes=%s");
+    LIST_OF_CODES("/alpha?codes=%s"),
+    CURRENCY("/currency/%s");
 
     String s;
 
