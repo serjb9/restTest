@@ -5,7 +5,6 @@ import org.BaseTest;
 import org.Site;
 import org.Utils;
 import org.apache.commons.lang3.StringUtils;
-import org.codehaus.groovy.util.StringUtil;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Rule;
@@ -14,7 +13,6 @@ import org.junit.rules.TestWatcher;
 import org.watchers.TestWatchman;
 
 import java.util.*;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static io.restassured.RestAssured.get;
@@ -90,6 +88,25 @@ public class FirstTest extends BaseTest {
                                 .get()
                                 .getString("nativeName")
                         , cName));
+    }
+
+    @Test
+    public void isISOLangCount() {
+        final String locale = "ru";
+        final int retCount = 9;
+
+        Response resp = get(utils.getEndpoint()
+                + format(Site.LANGUAGE, locale));
+
+        resp.then().statusCode(200);
+
+        assertTrue("Count of returned locales is incorrect. Expected: " + retCount,
+                ((int) StreamSupport.stream((new JSONArray(resp.asString())).spliterator(), false)
+                        .map(JSONObject.class::cast)
+                        .map(i -> i.getJSONArray("languages"))
+                        .count() == retCount));
+
+
     }
 
     private String format(Site structure, String str) {
