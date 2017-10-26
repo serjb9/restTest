@@ -52,10 +52,10 @@ public class FirstTest extends BaseTest {
         final String countryCode = "blr";
         final String capital = "Minsk";
 
-        Response resp = get(endpoint + format(Site.CODE, countryCode));
+        Response resp =
+                get(endpoint + format(Site.CODE, countryCode));
 
-        resp.
-                then().spec(respSp.getJsonSpec());
+        resp.then().spec(respSp.getJsonSpec());
 
         JSONObject jsonResponse = new JSONObject(resp.asString());
         assertTrue("Expected country differs than in the response.",
