@@ -5,7 +5,6 @@ import io.restassured.response.Response;
 import org.BaseTest;
 import org.Site;
 import org.specs.ResponseSpecs;
-import org.Utils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -27,7 +26,6 @@ public class FirstTest extends BaseTest {
 
     @Rule
     public TestWatcher tw = new TestWatchman();
-    private Utils utils = new Utils();
     private final String endpoint = RestAssured.basePath = utils.getEndpoint();
     private ResponseSpecs respSp = new ResponseSpecs();
 

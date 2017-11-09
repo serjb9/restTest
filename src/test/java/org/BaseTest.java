@@ -5,4 +5,15 @@ package org;
  */
 public class BaseTest extends ABase {
 
+    protected Utils utils = new Utils();
+
+//    use if a standalone mock is required
+
+//    @ClassRule
+//    public static WireMockClassRule wireMockRule = new WireMockClassRule(8089);
+
+//    @Rule
+//    public WireMockClassRule instanceRule = wireMockRule;
+
+
 }
