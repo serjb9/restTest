@@ -8,13 +8,12 @@ import org.BaseTest;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
-
 import org.watchers.TestWatchman;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.Assert.assertTrue;
 
-
+//@RunWith(RunnerWithExecListnr.class)
 public class MockTest extends BaseTest {
 
     private final String endpoint = RestAssured.basePath = "http://localhost:8080/myUrl/secondPart";
@@ -23,7 +22,7 @@ public class MockTest extends BaseTest {
     private WireMockRule ruleWM = new WireMockRule();
 
     @Rule
-    public RuleChain ch = RuleChain.outerRule(ruleTwm).around(ruleWM);
+    public RuleChain ch = RuleChain.outerRule(ruleWM).around(ruleTwm);
 
     @Test
     public void basicTest(){

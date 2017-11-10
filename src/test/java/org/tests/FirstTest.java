@@ -4,13 +4,15 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.BaseTest;
 import org.Site;
+import org.junit.Rule;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.RunWith;
+import org.runners.RunnerWithExecListnr;
 import org.specs.ResponseSpecs;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TestWatcher;
 import org.watchers.TestWatchman;
 
 import java.util.*;
@@ -22,6 +24,8 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created by serjb on 20.10.2017.
  */
+
+//@RunWith(RunnerWithExecListnr.class)
 public class FirstTest extends BaseTest {
 
     @Rule

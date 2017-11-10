@@ -20,4 +20,5 @@ public class TestWatchman extends TestWatcher {
     protected void succeeded(Description description) {
         LOG.info("Test "+ description.getDisplayName() + " -  successfully completed.");
     }
+
 }
