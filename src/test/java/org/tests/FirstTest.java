@@ -1,23 +1,30 @@
 package org.tests;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.BaseTest;
 import org.Site;
+import org.assertj.core.api.SoftAssertions;
+import org.calls.model.response.CCYResponse;
+import org.calls.model.response.FullTextResponse;
+import org.calls.model.response.CodeResponse;
+import org.calls.model.response.LanguageResponse;
 import org.specs.ResponseSpecs;
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestWatcher;
 import org.watchers.TestWatchman;
 
+import java.io.IOException;
 import java.util.*;
-import java.util.stream.StreamSupport;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.get;
-import static org.junit.Assert.assertTrue;
+import static junit.framework.TestCase.assertTrue;
+
 
 /**
  * Created by serjb on 20.10.2017.
@@ -30,23 +37,23 @@ public class FirstTest extends BaseTest {
     private ResponseSpecs respSp = new ResponseSpecs();
 
     @Test
-    public void testSingleCapital() {
+    public void testSingleCapital() throws IOException {
         final String country = "Belarus";
         final String capital = "Minsk";
 
         Response resp =
-                get(endpoint + format(Site.FULL_NAME, country));
+                get(endpoint + format(Site.FULL_TEXT, country));
 
         resp.then().spec(respSp.getJsonSpec());
+        // toDo: generify
+        FullTextResponse[] response = new ObjectMapper().readValue(resp.asString(), FullTextResponse[].class);
 
-        JSONArray jsonResponse = new JSONArray(resp.asString());
         assertTrue("Expected country is different than in the response.",
-                StringUtils.equals(jsonResponse.getJSONObject(0).getString("capital"), capital));
-
+                StringUtils.equals(response[0].getCapital(), capital));
     }
 
     @Test
-    public void testCODE() {
+    public void testCODE() throws IOException {
         final String countryCode = "blr";
         final String capital = "Minsk";
 
@@ -55,53 +62,55 @@ public class FirstTest extends BaseTest {
 
         resp.then().spec(respSp.getJsonSpec());
 
-        JSONObject jsonResponse = new JSONObject(resp.asString());
-        assertTrue("Expected country differs than in the response.",
-                StringUtils.equals(jsonResponse.getString("capital"), capital));
+        CodeResponse response = new ObjectMapper().readValue(resp.asString(), CodeResponse.class);
+
+        assertTrue("Expected country differs from the response.",
+                StringUtils.equals(response.getCapital(), capital));
     }
 
     @Test
-    public void testListOfCodes() {
-        final Iterator capitals = new LinkedList<>(Arrays.asList("Minsk", "Moscow", "Kiev")).iterator();
+    public void testListOfCodes() throws IOException {
+        final Iterator<String> capitals = new LinkedList<>(Arrays.asList("Minsk", "Moscow", "Kiev")).iterator();
         final String countries = "blr;ru;ua";
 
         Response resp =
-                get(endpoint
-                        + format(Site.LIST_OF_CODES, countries));
+                get(endpoint + format(Site.LIST_OF_CODES, countries));
 
         resp.then().spec(respSp.getJsonSpec());
 
-        new JSONArray(resp.asString()).forEach((i -> {
-            String currCountry = ((JSONObject) i).getString("capital");
-            assertTrue("Expected country is different than in the response. Received \"" + currCountry + "\" country",
-                    StringUtils.equals(currCountry, capitals.next().toString()));
-        }));
+        Stream.of(new ObjectMapper().readValue(resp.asString(), CodeResponse[].class))
+                .forEach(i -> {
+                    String expectedCountry = capitals.next().toString();
+                    assertTrue("Expected country is different than in the response." +
+                                    "\nReceived: \"" + i.getCapital() + "\" country" +
+                                    "\nExpected: \"" + expectedCountry + "\" country",
+                            StringUtils.equals(i.getCapital(), expectedCountry));
+                });
     }
 
     @Test
-    public void testISOCCY() {
+    public void testRequestedCountriesContainsCCY() throws IOException {
         final String ccy = "USD";
         final String cFullName = "United States of America";
-        final String cName = "United States";
 
         Response resp =
                 get(endpoint + format(Site.CURRENCY, ccy));
 
         resp.then().spec(respSp.getJsonSpec());
+        // toDo: generify
+        CCYResponse[] response = new ObjectMapper().readValue(resp.asString(), CCYResponse[].class);
 
-        assertTrue("The native country for ccy: " + ccy + " is invalid",
-                StringUtils.equals(
-                        StreamSupport.stream((new JSONArray(resp.asString())).spliterator(), false)
-                                .map(JSONObject.class::cast)
-                                .filter(i -> i.getString("name").contains(cFullName))
-                                .findFirst()
-                                .get()
-                                .getString("nativeName"),
-                        cName));
+        SoftAssertions softly = new SoftAssertions();
+        Arrays.stream(response)
+                .filter(i -> i.getName().equals(cFullName))
+                .collect(Collectors.toList())
+                .forEach(i -> i.getCurrencies().forEach(j ->
+                        softly.assertThat(j.getCode()).isEqualTo(ccy)));
+        softly.assertAll();
     }
 
     @Test
-    public void isISOLangCount() {
+    public void testTranslationCount() throws IOException {
         final String locale = "ru";
         final int retCount = 9;
 
@@ -109,12 +118,12 @@ public class FirstTest extends BaseTest {
                 get(endpoint + format(Site.LANGUAGE, locale));
 
         resp.then().spec(respSp.getJsonSpec());
+        // toDo: generify
+        LanguageResponse[] response = new ObjectMapper().readValue(resp.asString(), LanguageResponse[].class);
 
-        assertTrue("Count of returned locales is incorrect. Expected: " + retCount,
-                ((int) StreamSupport.stream((new JSONArray(resp.asString())).spliterator(), false)
-                        .map(JSONObject.class::cast)
-                        .map(i -> i.getJSONArray("languages"))
-                        .count() == retCount));
+
+        assertTrue("Expected country differs from the response.",
+                Arrays.stream(response).count() == retCount);
     }
 
     private String format(Site structure, String str) {
